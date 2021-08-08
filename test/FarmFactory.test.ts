@@ -86,10 +86,10 @@ describe("FarmFactory", () => {
         factory = await deployContract(
             admin,
             FarmFactoryArtifact,
-            ["Test Farm Reward", "REWARD", 100, (await provider.getBlockNumber()) + 100]
+            [100, (await provider.getBlockNumber()) + 100]
         ) as FarmFactory;
 
-        reward = (new Contract(await factory.farmReward(), SadcatArtifact.abi, provider) as Sadcat).connect(admin);
+        reward = (new Contract(await factory.sadcat(), SadcatArtifact.abi, provider) as Sadcat).connect(admin);
     })
 
     context("new FarmFactory", async () => {

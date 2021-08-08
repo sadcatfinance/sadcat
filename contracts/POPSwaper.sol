@@ -12,9 +12,9 @@ contract POPSwaper is IPOPSwaper {
 
     mapping(address => bool) private approved;
 
-    constructor(ISwaper _swaper) {
+    constructor(ISwaper _swaper, IWPOP _wpop) {
         swaper = _swaper;
-        wpop = IWPOP(0xa674048E5E255B581aaC66eaA6DCe07c54ECB5D6);
+        wpop = _wpop;
         wpop.approve(address(swaper), type(uint256).max);
     }
 
