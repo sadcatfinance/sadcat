@@ -78,39 +78,32 @@ contract TokenPair is FungibleToken, ITokenPair {
         emit SubtractLiquidity(from, liquidity, amount1, amount2);
     }
 
-    function swap1(address who, uint256 amountIn) onlySwaper override public returns (uint256 amountOut) {
+    function swap(IFungibleToken tokenIn, IFungibleToken tokenOut, uint256 amountIn) internal returns (uint256 amountOut) {
 
-        uint256 balance1 = token1.balanceOf(address(this));
-        uint256 balance2 = token2.balanceOf(address(this));
+        uint256 balanceIn = tokenIn.balanceOf(address(this));
+        uint256 balanceOut = tokenOut.balanceOf(address(this));
 
-        amountOut = balance2 * amountIn / balance1;
         uint256 feeIn = swaper.calculateFee(amountIn);
-        uint256 feeOut = swaper.calculateFee(amountOut);
-        amountOut -= feeOut;
+        uint256 devFeeIn = swaper.calculateDevFee(amountIn);
 
-        token1.transferFrom(msg.sender, address(this), amountIn);
-        token1.transfer(swaper.feeTo(), feeIn);
-        token2.transfer(msg.sender, amountOut);
-        token2.transfer(swaper.feeTo(), feeOut);
-        
+        amountOut = balanceOut * (amountIn - feeIn - devFeeIn) / balanceIn;
+        uint256 feeOut = swaper.calculateFee(amountOut);
+        uint256 devFeeOut = swaper.calculateDevFee(amountOut);
+        amountOut -= feeOut + devFeeOut;
+
+        tokenIn.transferFrom(msg.sender, address(this), amountIn);
+        tokenIn.transfer(swaper.dev(), devFeeIn);
+        tokenOut.transfer(msg.sender, amountOut);
+        tokenOut.transfer(swaper.dev(), devFeeOut);
+    }
+
+    function swap1(address who, uint256 amountIn) onlySwaper override public returns (uint256 amountOut) {
+        amountOut = swap(token1, token2, amountIn);
         emit Swap1(who, amountIn, amountOut);
     }
 
     function swap2(address who, uint256 amountIn) onlySwaper override public returns (uint256 amountOut) {
-
-        uint256 balance2 = token2.balanceOf(address(this));
-        uint256 balance1 = token1.balanceOf(address(this));
-
-        amountOut = balance1 * amountIn / balance2;
-        uint256 feeIn = swaper.calculateFee(amountIn);
-        uint256 feeOut = swaper.calculateFee(amountOut);
-        amountOut -= feeOut;
-
-        token2.transferFrom(msg.sender, address(this), amountIn);
-        token2.transfer(swaper.feeTo(), feeIn);
-        token1.transfer(msg.sender, amountOut);
-        token1.transfer(swaper.feeTo(), feeOut);
-        
+        amountOut = swap(token2, token1, amountIn);
         emit Swap1(who, amountIn, amountOut);
     }
 }

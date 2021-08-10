@@ -8,29 +8,33 @@ import "./libraries/String.sol";
 
 contract Swaper is ISwaper {
 
-    address override public feeTo;
-    address override public feeToSetter;
+    address override public dev;
+    address override public devSetter;
 
     mapping(address => mapping(address => ITokenPair)) internal tokenToPair;
     ITokenPair[] override public pairs;
 
     constructor() {
-        feeTo = msg.sender;
-        feeToSetter = msg.sender;
+        dev = msg.sender;
+        devSetter = msg.sender;
     }
 
-    function setFeeTo(address _feeTo) external {
-        require(msg.sender == feeToSetter);
-        feeTo = _feeTo;
+    function setDev(address _dev) external {
+        require(msg.sender == devSetter);
+        dev = _dev;
     }
 
-    function setFeeToSetter(address _feeToSetter) external {
-        require(msg.sender == feeToSetter);
-        feeToSetter = _feeToSetter;
+    function setFeeToSetter(address _devSetter) external {
+        require(msg.sender == devSetter);
+        devSetter = _devSetter;
     }
     
     function calculateFee(uint256 amount) override external pure returns (uint256 fee) {
-        fee = amount * 3 / 1000; // 0.3%
+        fee = amount * 25 / 10000; // 0.25%
+    }
+    
+    function calculateDevFee(uint256 amount) override external pure returns (uint256 devFee) {
+        devFee = amount * 5 / 10000; // 0.05%
     }
 
     function pairCount() override external view returns (uint256) {
